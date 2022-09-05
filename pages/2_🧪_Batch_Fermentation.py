@@ -3,12 +3,14 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import math
 
+st.title("Batch fermentation simulator")
+st.markdown('This app lets you simulate an anaerobic batch fermentation. The simulator has 15 inputs and has 4 graphs as output. The first graph shows the substrate concentration over time, the second graph the biomass and products concentration. The third graph shows the growth rate over time. The last graph show the amount of off-gas. How the model works and its limitations are documented [here](https://www.dna-vorm.com/bio-tools). ')
 col1, col2, col3, =st.columns(3)
 
 
-tf=col1.number_input('The time that the reactor is running (hours)',min_value=1,max_value=240, value=48, step=1)
-K_Pace=col1.number_input('The inhibition constant of growth inhibition molecule 1 (kg/m^3)',min_value=0.,max_value=400., value=0., step=0.1)
-K_Peth=col1.number_input('The inhibition constant of growth inhibition molecule 2 (kg/m^3)',min_value=0.,max_value=400., value=0., step=0.1)
+tf=col1.number_input('The time that the reactor is running (hours)',min_value=1,max_value=240, value=144, step=1)
+K_Pace=col1.number_input('The inhibition constant of growth inhibition product 2 (kg/m^3)',min_value=0.,max_value=400., value=0., step=0.1)
+K_Peth=col1.number_input('The inhibition constant of growth inhibition product 1 (kg/m^3)',min_value=0.,max_value=400., value=0., step=0.1)
 Ypco2=col3.number_input('The Yield of CO2 on the substrate (kg_CO2/kg_S)',min_value=0.,max_value=10., value=1., step=0.01)
 C_X0 = col1.number_input('Biomass concentration at t=0 (g/L)',min_value=0.,max_value=100., value=0.1, step=0.01)  # gX/L or 1e-4 mass fraction
 C_S0 = col2.number_input('Substrate concentration at t=0 (g/L)',min_value=0., max_value=530.,value=100., step=0.1)  # gS/L or 0.1 mass fraction
@@ -133,10 +135,12 @@ while t < tf:
 t_plot = [t / 24 / 3600 for t in t_v]
 mu_plot = [mu * 3600 for mu in mu_v]
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 15))
-ax1.plot(t_plot, C_S_v, 'r-', t_plot, C_X_v, t_plot, C_P_v, t_plot, C_Pace_v, 'g-', linewidth=2)
-ax1.legend(['Concentration glucose', 'Concentration biomass', 'Concentration ethanol', 'Concentration acetate'])
-ax1.set(xlabel='Time (days)', ylabel='Concentration (kg/$m^3$)',
-        title='Concentration of different compounds in N.I.N.O.')
+ax1.plot(t_plot, C_S_v, 'r-', linewidth=2)
+ax1.set(xlabel='Time (days)', ylabel='Concentration substrate (kg/$m^3$)',
+        title='Concentration of \n substrate over time')
+ax1.title.set_fontsize(30)
+ax1.xaxis.label.set_fontsize(18)
+ax1.yaxis.label.set_fontsize(18)
 
 # ax2.plot(t_plot, pH_v,linewidth=2)
 # ax2.plot([0,tf/(3600*24)],[6,6], color='r')
@@ -144,13 +148,25 @@ ax1.set(xlabel='Time (days)', ylabel='Concentration (kg/$m^3$)',
 # ax2.set(xlabel='Time (days)', ylabel='pH', title='pH in the reactor over time'+title_ph)
 # ax2.legend(['pH of reactor','pH threshold'])
 
-ax2.plot(t_plot, V_co2_v, linewidth=2)
-ax2.set(xlabel='Time (days)', ylabel='Total off gas volume (ml)', title='Total offgass volume')
+ax4.plot(t_plot, V_co2_v, linewidth=2)
+ax4.set(xlabel='Time (days)', ylabel='Total off gas volume (ml)', title='Total offgass volume')
+ax4.title.set_fontsize(30)
+ax4.xaxis.label.set_fontsize(18)
+ax4.yaxis.label.set_fontsize(18)
 
 ax3.plot(t_plot[:-1], mu_plot, 'y-', linewidth=2)
 ax3.set(xlabel='Time (days)', ylabel='$\mu$ (1/h)', title='Growth rate over time')
+ax3.title.set_fontsize(30)
+ax3.xaxis.label.set_fontsize(18)
+ax3.yaxis.label.set_fontsize(18)
 
-
+ax2.plot(t_plot, C_X_v, t_plot, C_P_v, t_plot, C_Pace_v, 'g-', linewidth=2)
+ax2.legend(['Concentration biomass', 'Concentration product 1', 'Concentration product 2'])
+ax2.set(xlabel='Time (days)', ylabel='Concentration (kg/$m^3$)',
+        title='Concentration of \n biomass and products.')
+ax2.title.set_fontsize(30)
+ax2.xaxis.label.set_fontsize(18)
+ax2.yaxis.label.set_fontsize(18)
 # lns = lns1+lns2
 # labs = [l.get_label() for l in lns]
 # ax4.legend(lns,labs,loc=0)

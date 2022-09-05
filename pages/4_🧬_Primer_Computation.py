@@ -4,6 +4,9 @@ import math
 from Bio.SeqUtils import GC
 import streamlit as st
 
+st.title("PCR primer computer")
+st.markdown('This app computes the forward and reverse primer. It also calculates the melting temperature of both primers. How the app works and its limitations are documented [here](https://www.dna-vorm.com/bio-tools).')
+st.markdown('Based on the paper: [*A unified view of polymer, dumbbell, and oligonucleotide DNA nearest-neighbor thermodynamics*](https://www.pnas.org/doi/pdf/10.1073/pnas.95.4.1460).')
 
 my_seq=Seq(st.text_input("Your target sequence"))
 my_seq=my_seq.upper()

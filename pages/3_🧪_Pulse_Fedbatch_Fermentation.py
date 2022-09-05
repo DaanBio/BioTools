@@ -3,14 +3,18 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import math
 
+st.title("Pulsed fedbatch fermentation simulator")
+st.markdown('This app lets you simulate an anaerobic fedbatch fermentation that feeds in pulses. The simulator has 18 inputs and has 4 graphs as output. The first graph shows the substrate, biomass, and products concentration over time. The second graph shows the amount of off-gas. The third graph shows the growth rate over time. The last graph shows the volume of fermentation broth and the feed value. How the model works and its limitations are documented [here](https://www.dna-vorm.com/bio-tools). ')
+
+
 col1, col2, col3, =st.columns(3)
 
 
-tf=col1.number_input('The time that the reactor is running (hours)',min_value=1,max_value=240, value=48, step=1)
-t_act_S=col1.number_input('The interval at which substrate is added to the reactor (hours)',min_value=0.,max_value=240., value=2., step=0.1)
+tf=col1.number_input('The time that the reactor is running (hours)',min_value=1,max_value=240, value=144, step=1)
+t_act_S=col1.number_input('The interval at which substrate is added to the reactor (hours)',min_value=0.,max_value=240., value=8., step=0.1)
 Fin_S=col1.number_input('The amount of volume added to the reactor when pulse-feeding (ml)',min_value=0.,max_value=100000., value=1., step=0.1)
-K_Pace=col3.number_input('The inhibition constant of growth inhibition molecule 1 (kg/m^3)',min_value=0.,max_value=400., value=10., step=0.1)
-K_Peth=col3.number_input('The inhibition constant of growth inhibition molecule 2 (kg/m^3)',min_value=0.,max_value=400., value=1., step=0.1)
+K_Pace=col3.number_input('The inhibition constant of growth inhibition molecule 1 (kg/m^3)',min_value=0.,max_value=400., value=0., step=0.1)
+K_Peth=col3.number_input('The inhibition constant of growth inhibition molecule 2 (kg/m^3)',min_value=0.,max_value=400., value=0., step=0.1)
 Ypco2=col3.number_input('The Yield of CO2 on the substrate (kg_CO2/kg_S)',min_value=0.,max_value=10., value=1., step=0.01)
 C_X0 = col1.number_input('Biomass concentration at t=0 (g/L)',min_value=0.,max_value=100., value=0.1, step=0.01)  # gX/L or 1e-4 mass fraction
 C_S0 = col2.number_input('Substrate concentration at t=0 (g/L)',min_value=0., max_value=530.,value=0., step=0.1)  # gS/L or 0.1 mass fraction
@@ -67,7 +71,14 @@ while t < tf:
     F = F_S
 
     # Compute rates
-    mu = mu_max * C_S / (C_S + K_S) * (K_Pace / (C_Pace + K_Pace)) * (K_Peth / (C_P + K_Peth))
+    if K_Pace==0 and K_Peth==0:
+        mu = mu_max * C_S / (C_S + K_S)
+    elif K_Pace==0:
+        mu = mu_max * C_S / (C_S + K_S) * ((K_Peth) / (C_P + K_Peth))
+    elif K_Peth==0:
+        mu = mu_max * C_S / (C_S + K_S) * ((K_Pace) / (C_Pace + K_Pace))
+    else:
+        mu = mu_max * C_S / (C_S + K_S) * ((K_Pace) / (C_Pace + K_Pace)) * ((K_Peth) / (C_P + K_Peth))
     rXg = mu * C_X
     rXd = k_d * C_X
     rX = rXg - rXd
@@ -149,10 +160,13 @@ t_plot = [t / 24 / 3600 for t in t_v]
 mu_plot = [mu * 3600 for mu in mu_v]
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 15))
 ax1.plot(t_plot, C_S_v, 'r-', t_plot, C_X_v, t_plot, C_P_v, t_plot, C_Pace_v, 'g-', linewidth=2)
-ax1.legend(['Concentration glucose', 'Concentration biomass', 'Concentration ethanol', 'Concentration acetate'])
+ax1.legend(['Concentration glucose', 'Concentration biomass', 'Concentration ethanol', 'Concentration acetate'], loc=2, fontsize=14)
 ax1.set(xlabel='Time (days)', ylabel='Concentration (kg/$m^3$)',
-        title='Concentration of different compounds in N.I.N.O.')
-
+        title='Concentration of \n different compounds in N.I.N.O.')
+ax1.title.set_fontsize(30)
+ax1.xaxis.label.set_fontsize(18)
+ax1.yaxis.label.set_fontsize(18)
+ax1.tick_params(labelsize=18)
 # ax2.plot(t_plot, pH_v,linewidth=2)
 # ax2.plot([0,tf/(3600*24)],[6,6], color='r')
 # ax2.plot([0,tf/(3600*24)],[8,8], color='r')
@@ -161,19 +175,34 @@ ax1.set(xlabel='Time (days)', ylabel='Concentration (kg/$m^3$)',
 
 ax2.plot(t_plot, V_co2_v, linewidth=2)
 ax2.set(xlabel='Time (days)', ylabel='Total off gas volume (ml)', title='Total offgass volume')
+ax2.title.set_fontsize(30)
+ax2.xaxis.label.set_fontsize(18)
+ax2.yaxis.label.set_fontsize(18)
+ax2.tick_params(labelsize=18)
 
 ax3.plot(t_plot[:-1], mu_plot, 'y-', linewidth=2)
 ax3.set(xlabel='Time (days)', ylabel='$\mu$ (1/h)', title='Growth rate over time')
+ax3.title.set_fontsize(30)
+ax3.xaxis.label.set_fontsize(18)
+ax3.yaxis.label.set_fontsize(18)
+ax3.tick_params(labelsize=18)
 
-ax4.set_title('Volume and flowrate of N.I.N.O')
+ax4.set_title('Volume and flowrate')
 ax4.scatter(t_plot, F_v, linewidth=2, label='Flowrate')
 ax4.set(xlabel='Time (days)', ylabel='Flowrate (ml/s)')
-ax4.legend(loc=6)
+ax4.legend(loc=6, fontsize=14)
 ax5 = ax4.twinx()
 ax5.plot(t_plot[1:], V_v[1:], 'g-', linewidth=2, label='Volume')
 ax5.set_ylabel('Volume (mL)')
 ax5.ticklabel_format(axis="y")
-ax5.legend(loc=5)
+ax5.legend(loc=5, fontsize=14)
+ax4.title.set_fontsize(30)
+ax4.xaxis.label.set_fontsize(18)
+ax4.yaxis.label.set_fontsize(18)
+ax5.xaxis.label.set_fontsize(18)
+ax5.yaxis.label.set_fontsize(18)
+ax4.tick_params(labelsize=18)
+ax5.tick_params(labelsize=18)
 # lns = lns1+lns2
 # labs = [l.get_label() for l in lns]
 # ax4.legend(lns,labs,loc=0)
