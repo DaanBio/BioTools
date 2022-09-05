@@ -1,0 +1,4 @@
+Bio==1.4.0
+matplotlib==3.5.1
+numpy==1.21.5
+streamlit==1.12.2
