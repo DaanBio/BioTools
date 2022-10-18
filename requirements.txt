@@ -11,3 +11,5 @@ six==1.16.0
 streamlit==1.12.2
 tensorflow==2.9.2
 tqdm==4.64.1
+XlsxWriter==3.0.3
+

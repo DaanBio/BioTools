@@ -30,10 +30,12 @@ uploaded_file = st.file_uploader("Upload Files", type=['png', 'jpeg','jpg'])
 labelmap_path='Colonyfinder/label_map.pbtxt'
 category_index = label_map_util.create_category_index_from_labelmap(labelmap_path, use_display_name=True)
 
+
 with st.spinner('loading R-CNN model....'):
     tf.keras.backend.clear_session()
     model = tf.saved_model.load('Colonyfinder/saved_model')
 st.success('Done!')
+
 
 def run_inference_for_single_image(model, image):
     image = np.asarray(image)
