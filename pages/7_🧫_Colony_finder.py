@@ -22,9 +22,13 @@ import streamlit as st
 from tqdm import tqdm
 
 # load model first
+@st.cache
 with st.spinner('loading R-CNN model....'):
-    tf.keras.backend.clear_session()
-    model = tf.saved_model.load('Colonyfinder/saved_model')
+    def load_model():
+        tf.keras.backend.clear_session()
+        return tf.saved_model.load('Colonyfinder/saved_model')
+
+    model = load_model()
 st.success('Done!')
 
 # streamlit part
