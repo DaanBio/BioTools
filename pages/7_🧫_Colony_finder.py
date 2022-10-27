@@ -23,13 +23,11 @@ from tqdm import tqdm
 
 # load model first
 @st.cache
-with st.spinner('loading R-CNN model....'):
-    def load_model():
-        tf.keras.backend.clear_session()
-        return tf.saved_model.load('Colonyfinder/saved_model')
+def load_RCNN_model():
+    tf.keras.backend.clear_session()
+    return tf.saved_model.load('Colonyfinder/saved_model')
 
-    model = load_model()
-st.success('Done!')
+model = load_RCNN_model()
 
 # streamlit part
 st.title("Colony finder")
